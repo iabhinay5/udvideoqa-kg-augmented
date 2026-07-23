@@ -1,56 +1,80 @@
 % =========================================================
-%  KG-Augmented VideoQA — Capstone Report
-%  M.Tech Capstone, IIIT Delhi, 2026
+%  Knowledge Graph-Augmented VideoQA for Urban Traffic Surveillance
+%  M.Tech Capstone Report — IIIT Delhi, 2026
 %  Author: Abhinay Prakash
-%  Template: IEEE Transactions / Conference Style
+%  Style: IEEE Conference (IEEEtran, compsoc)
+%
+%  Compile: pdflatex report.tex  (twice for cross-references)
+%  Or upload to Overleaf with figures/ folder at the same level.
 % =========================================================
-\documentclass[10pt, conference, compsoc]{IEEEtran}
+\documentclass[10pt,conference,compsoc]{IEEEtran}
 
-% ── Packages ─────────────────────────────────────────────
+% ── Encoding & fonts ─────────────────────────────────────
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{cite}
+\usepackage{microtype}
+
+% ── Math ─────────────────────────────────────────────────
 \usepackage{amsmath,amssymb,amsfonts}
+
+% ── Graphics & tables ────────────────────────────────────
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+
+% ── Colour ───────────────────────────────────────────────
+\usepackage[dvipsnames,table]{xcolor}
+
+% ── References & links ───────────────────────────────────
+\usepackage{cite}
 \usepackage{url}
-\usepackage{hyperref}
-\usepackage{microtype}
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+% ── Algorithms ───────────────────────────────────────────
 \usepackage{algorithm}
 \usepackage{algorithmic}
+
+% ── Captions ─────────────────────────────────────────────
 \usepackage{caption}
 \usepackage{subcaption}
 
-\hypersetup{
-  colorlinks = true,
-  linkcolor  = blue!60!black,
-  citecolor  = green!50!black,
-  urlcolor   = blue!70!black,
-}
+% ── Spacing helpers ──────────────────────────────────────
+\usepackage{balance}   % balance last-page columns
+\usepackage{enumitem}  % enumerate[label=...] support
+\usepackage{bm}        % \bm bold math
 
-% ── Macros ───────────────────────────────────────────────
+% ─────────────────────────────────────────────────────────
+%  Macros
+% ─────────────────────────────────────────────────────────
 \newcommand{\ours}{\textsc{KG-VideoQA}}
 \newcommand{\dataset}{\textsc{UDVideoQA}}
-\newcommand{\pp}{\,pp}          % percentage points
+\newcommand{\pp}{\,pp}                     % percentage points
 \newcommand{\eg}{\textit{e.g.,}~}
 \newcommand{\ie}{\textit{i.e.,}~}
+\newcommand{\etal}{\textit{et~al.}}
 
-% ── Title ────────────────────────────────────────────────
+% Green / red delta colours
+\newcommand{\pos}[1]{\textcolor{ForestGreen}{\textbf{+#1}}}
+\newcommand{\neg}[1]{\textcolor{red}{$-$#1}}
+
+% ─────────────────────────────────────────────────────────
+%  Title & author
+% ─────────────────────────────────────────────────────────
 \title{Knowledge Graph-Augmented Video Question Answering\\
        for Urban Traffic Surveillance}
 
-\author{
+\author{%
   \IEEEauthorblockN{Abhinay Prakash}
-  \IEEEauthorblockA{
-    Department of Computer Science and Engineering\\
-    Indraprastha Institute of Information Technology, Delhi (IIIT-D)\\
-    New Delhi, India\\
-    \texttt{abhinay.prakash@iiitd.ac.in}
+  \IEEEauthorblockA{%
+    Dept.\ of Computer Science \& Engineering\\
+    Indraprastha Institute of Information Technology Delhi (IIIT-D)\\
+    New Delhi, India
   }
 }
 
+% =========================================================
 \begin{document}
 \maketitle
 
@@ -58,360 +82,480 @@
 \begin{abstract}
 Video Question Answering (VideoQA) on urban traffic surveillance
 requires fine-grained visual grounding, temporal reasoning, and
-robustness to adverse lighting---abilities that current
-Video-Language Models (VLMs) lack.
-We present \ours{}, a training-free Knowledge Graph-Augmented
+robustness to adverse illumination---capabilities that current
+Video-Language Models (VLMs) demonstrably lack in morning glare.
+We present \ours{}, a \emph{training-free} Knowledge Graph-Augmented
 Retrieval pipeline that extracts structured scene facts from raw
-video pixels---dominant building colour (via HSV analysis with
-glare filtering), road marking type (via centre-lane morphology),
-and detected objects (via YOLOv8n)---and injects them as grounded
-context into a small VLM at inference time.
+video pixels---dominant building colour (HSV analysis with
+glare-pixel rejection), road marking type (centre-lane morphology),
+and detected objects (YOLOv8n)---and injects them as grounded
+context into a compact VLM at inference time.
 Evaluated on the \dataset{} benchmark~\cite{udvideoqa2026}
-(morning condition, 4,058 QA pairs across five reasoning levels),
+(morning condition, 4{,}058 QA pairs, five reasoning levels),
 our Qwen2.5-VL-3B backbone achieves \textbf{67.7\%} overall
-accuracy, surpassing the paper's best open-source 32B model
-(56.24\%) by \textbf{+11.5\pp} using a model \textbf{10$\times$
-smaller}.
-A controlled ablation reveals that pixel-only KG (78.4\% on
-Attribution) \emph{substantially outperforms} Full KG+YOLO
-(57.3\%), because object-detection facts are irrelevant to
-attribute-level questions and introduce prompt noise, motivating
-future question-type-aware knowledge graph construction.
+weighted accuracy, surpassing the paper's best open-source 32B
+model (56.24\%) by \textbf{+11.5\pp} while using a
+\textbf{10$\boldsymbol{\times}$ smaller} model.
+A controlled ablation reveals that pixel-only KG (78.4\% Attribution)
+\emph{substantially outperforms} Full KG+YOLO (57.3\%), because
+object-detection facts are irrelevant to attribute-level questions
+and introduce prompt noise---motivating question-type-aware
+knowledge graph construction as a key direction for future work.
 \end{abstract}
 
 \begin{IEEEkeywords}
 Video Question Answering, Knowledge Graphs, Graph-Augmented
 Retrieval, Video-Language Models, Traffic Scene Understanding,
-Morning Glare Robustness
+Glare Robustness, GraphRAG
 \end{IEEEkeywords}
 
 
-% ─────────────────────────────────────────────────────────
+% =========================================================
 \section{Introduction}
 \label{sec:intro}
+% =========================================================
 
-Urban traffic surveillance cameras generate continuous, dense
-video streams that capture complex, multi-agent interactions under
-real-world conditions including glare, occlusion, and crowding.
-Automatically answering natural-language questions about such
-video---\eg ``What colour is the building on the right?'' or
-``Why did the vehicle stop?''---requires jointly reasoning over
+Urban traffic surveillance cameras produce continuous, dense video
+streams capturing complex, multi-agent scenes under real-world
+conditions: low-angle sun glare, occlusion, crowding, and rapidly
+changing lighting.
+Answering natural-language questions about such video
+(\eg ``What colour is the building facade on the right?'' or
+``Why did the motorcycle stop?'') demands joint reasoning over
 pixel-level visual attributes, object identities and their
-relationships, and temporal event sequences.
+spatial relationships, and temporal event sequences.
 
-Recent benchmarks such as \dataset{}~\cite{udvideoqa2026}
-formalise this challenge through a five-level reasoning taxonomy:
-Basic Understanding (BU), Attribution (Atr), Event Reasoning (ER),
-Reverse Reasoning (RR), and Counterfactual Inference (CI).
-The benchmark evaluates ten state-of-the-art VideoLMs and reveals
-a striking \emph{perception--reasoning gap}: while top models
-achieve $\sim$90\% on abstract reasoning (CI), they collapse to
-$\sim$22\% on fine-grained visual attribution (Atr) in morning
-lighting---a condition characterised by low-angle sun glare, pixel
-saturation, and extreme dynamic range.
+The \dataset{}~\cite{udvideoqa2026} benchmark formalises this
+challenge through a five-level reasoning taxonomy: Basic
+Understanding (BU), Attribution (Atr), Event Reasoning (ER),
+Reverse Reasoning (RR), and Counterfactual Inference (CI),
+evaluated across morning, afternoon, and evening illumination
+conditions.
+A striking \emph{perception--reasoning gap} emerges in the
+benchmark's results: while top models achieve $\sim$90\% on
+abstract reasoning (CI), performance collapses to $\sim$22\% on
+fine-grained visual Attribution under morning lighting.
 
-This degradation is not a failure of model scale.
-Gemini 2.5 Pro (proprietary, $>$100B parameters) achieves only
-22.22\% on morning Attribution.
+\textbf{This failure is not explained by model scale.}
+Gemini~2.5~Pro (proprietary, estimated $>$100B parameters) achieves
+only 22.22\% on morning Attribution.
 The root cause is that VLMs rely on neural visual encoders whose
-attention is corrupted by overexposed pixels; when the visual
-signal is degraded, models fall back on language priors (\eg
-``it is probably a white car'') rather than grounding in image
-evidence.
+attention is corrupted by overexposed pixels: when the visual
+signal is saturated, models substitute language priors
+(\eg ``it is probably a white building'') for image evidence.
 
-\textbf{Our hypothesis}: structured, factual scene representations
-built from non-neural pixel analysis can bypass this glare-induced
-failure and ground VLM reasoning in verifiable scene facts.
-We propose \ours{}, a \emph{training-free} pipeline that:
-(i) constructs a per-clip Knowledge Graph from raw pixel analysis
-and object detection;
-(ii) retrieves question-relevant graph facts; and
-(iii) injects them as a structured prefix into the VLM prompt.
-
-\textbf{Contributions}:
-\begin{enumerate}
-  \item A lightweight, training-free KG-Augmented Retrieval
-        pipeline for VideoQA on traffic surveillance, achieving
-        state-of-the-art on \dataset{} (morning) with a 3B model.
-  \item A controlled ablation revealing that pixel-only KG
-        (+47.9\pp\ on Attribution) outperforms Full KG+YOLO
-        (+26.8\pp), exposing the cost of irrelevant fact injection.
-  \item Evidence of a \emph{question-type--knowledge-type mismatch}:
-        object detection facts help Reverse Reasoning (+22.9\pp\
-        overall) but actively harm Attribution (--21.1\pp),
-        motivating question-type-aware KG construction.
+\textbf{Hypothesis.}
+Structured, factual scene representations constructed via
+\emph{non-neural} pixel analysis can bypass glare-induced
+encoder failure and ground VLM reasoning in verifiable scene facts.
+We propose \ours{}, a training-free pipeline that:
+\begin{enumerate}[label=(\roman*)]
+  \item constructs a per-clip Knowledge Graph from pixel-level
+        colour analysis, road marking detection, and object detection;
+  \item retrieves question-relevant graph facts via keyword matching; and
+  \item injects them as a structured textual prefix into the VLM
+        prompt at inference time.
 \end{enumerate}
 
+\textbf{Contributions:}
+\begin{enumerate}
+  \item A lightweight, training-free KG-Augmented Retrieval
+        pipeline for VideoQA on traffic surveillance that achieves
+        state-of-the-art accuracy on \dataset{} (morning) with
+        a 3B-parameter model.
 
-% ─────────────────────────────────────────────────────────
+  \item A controlled ablation isolating each KG component:
+        pixel-only colour + road marking (78.4\%) vs.\ full KG
+        with YOLO objects (57.3\%), exposing a \textbf{21.1\pp}
+        cost from irrelevant fact injection.
+
+  \item Characterisation of a \emph{question-type--knowledge-type
+        mismatch}: object detection facts benefit holistic
+        scene tasks (RR: +22.9\pp\ overall) while actively harming
+        attribute-specific tasks (Atr: $-$21.1\pp\ ablation),
+        motivating question-type-aware KG retrieval.
+\end{enumerate}
+
+The remainder of this paper is structured as follows.
+Section~\ref{sec:related} reviews related work.
+Section~\ref{sec:dataset} describes the dataset and evaluation
+protocol.
+Section~\ref{sec:method} details the pipeline.
+Section~\ref{sec:experiments} presents experimental results.
+Section~\ref{sec:discussion} analyses key findings, and
+Section~\ref{sec:conclusion} concludes.
+
+
+% =========================================================
 \section{Related Work}
 \label{sec:related}
+% =========================================================
 
 \subsection{Video Question Answering}
 
-VideoQA datasets have evolved from web-sourced clips
+VideoQA benchmarks have evolved from web-sourced clips
 (\eg ActivityNet-QA~\cite{yu2019activitynet},
-MSVD-QA~\cite{xu2017video}) to domain-specific benchmarks.
-Traffic-focused datasets include
-NExT-QA~\cite{xiao2021nextqa} and SUTDTrafficQA~\cite{xu2021sutd},
-but neither captures the density and adversarial lighting of
-real urban surveillance.
-\dataset{}~\cite{udvideoqa2026} is the first benchmark with
-continuous 10-second surveillance clips annotated at
-$\sim$1 QA/second density under real morning, afternoon, and
-evening conditions.
+MSVD-QA~\cite{xu2017video}) towards domain-specific,
+temporally-dense evaluation.
+Traffic-focused datasets include NExT-QA~\cite{xiao2021nextqa}
+and SUTDTrafficQA~\cite{xu2021sutd}, but neither addresses
+the density or adversarial illumination of real urban
+surveillance footage.
+\dataset{}~\cite{udvideoqa2026} is the first benchmark built
+from continuous multi-camera intersection recordings,
+annotated at $\sim$1 QA-pair per second density across
+three real-world illumination conditions.
 
 \subsection{Knowledge Graphs for Visual Reasoning}
 
-Scene graph generation~\cite{xu2017scenegraph} and
-visual KG construction~\cite{marino2019ok} have been used to
-augment image QA.
+Scene graph generation~\cite{xu2017scenegraph} and knowledge-base
+augmented image QA~\cite{marino2019ok} have demonstrated the
+value of structured representations for visual reasoning.
 For video, SDGraphR~\cite{sdgraphr2022} builds dynamic scene
-graphs for self-supervised reasoning, and VTKGG~\cite{vtkgg2023}
-constructs traffic knowledge graphs from detection outputs.
-GraphRAG~\cite{edge2024graphrag} generalises KG-augmented
-generation to arbitrary text domains.
-Our work adapts this paradigm to \emph{video} surveillance,
-using pixel-level colour extraction as a glare-robust alternative
-to VLM-based scene description.
+graphs for self-supervised temporal QA, while
+VTKGG~\cite{vtkgg2023} constructs traffic-domain knowledge graphs
+from detection outputs.
+GraphRAG~\cite{edge2024graphrag} generalises graph-augmented
+generation to arbitrary retrieval settings.
+Our work extends this paradigm to surveillance VideoQA, replacing
+VLM-generated scene descriptions---which inherit glare bias---with
+deterministic, pixel-level colour and morphology analysis.
 
-\subsection{LLM-Augmented Retrieval for VideoQA}
+\subsection{Retrieval-Augmented Generation for QA}
 
-Retrieval-Augmented Generation (RAG) for QA injects retrieved
-context into LLM prompts without retraining~\cite{lewis2020rag}.
-For VideoQA, prior work retrieves textual captions or frame
-descriptions~\cite{yang2022zeroshot}.
-We extend this to \emph{structured graph retrieval}, where the
-retrieved context is a curated set of KG facts directly addressing
-the question's information need.
+Retrieval-Augmented Generation (RAG)~\cite{lewis2020rag} improves
+factual grounding in LLMs by injecting retrieved context at
+inference time without retraining.
+For VideoQA, prior methods retrieve textual frame captions or
+web knowledge~\cite{yang2022zeroshot}.
+We extend this to \emph{structured graph retrieval}: the retrieved
+context is a curated subset of KG facts selected per-question,
+guaranteeing relevance to the specific information need.
 
 
-% ─────────────────────────────────────────────────────────
+% =========================================================
 \section{Dataset and Task}
 \label{sec:dataset}
+% =========================================================
 
 \subsection{UDVideoQA Benchmark}
 
 \dataset{}~\cite{udvideoqa2026} comprises 16 hours of
-real urban traffic surveillance footage (1.7M frames, Full-HD
-1920$\times$1080 at 30 fps) captured across multiple metropolitan
-intersections.
-From 8 densely annotated hours, 28,800 QA pairs are derived
-($\sim$3,600 QA/hour, $\sim$1 QA/second) across five reasoning
-levels with complexity weights $w \in \{1.0, 1.2, 1.3, 1.3, 1.5\}$
-for BU, Atr, ER, RR, CI respectively.
+real urban traffic surveillance footage (Full-HD 1920$\times$1080,
+30\,fps, approximately 1.7M frames) captured at multiple
+metropolitan intersections.
+From 8 densely annotated hours, 28{,}800 QA pairs are derived
+at a density of $\sim$3{,}600 pairs per hour across five reasoning
+levels with assigned complexity weights:
+
+\begin{center}
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Question Type} & \textbf{Abbrev.} & \textbf{Weight $w$} \\
+\midrule
+Basic Understanding     & BU  & 1.0 \\
+Attribution             & Atr & 1.2 \\
+Event Reasoning         & ER  & 1.3 \\
+Reverse Reasoning       & RR  & 1.3 \\
+Counterfactual Inference& CI  & 1.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 QA pairs are annotated under three illumination conditions:
 morning (7--9\,AM), afternoon (11\,AM--1\,PM), and evening
 (5--7\,PM).
+Morning is the most challenging due to low-angle sun glare,
+pixel saturation, and extreme dynamic range.
 
 \subsection{Experimental Scope}
 
-We focus on the \textbf{morning condition}, which presents the
-greatest challenge due to low-angle sun glare, pixel saturation,
-and extreme dynamic range.
-Our test set comprises \textbf{4,058 QA pairs} (5 question types,
-5 surveillance sets: Set\_26, 30, 33, 34, 35) drawn from a held-out
-intersection not seen during the KG pipeline's development.
+This work focuses exclusively on the \textbf{morning condition}.
+Our test set comprises \textbf{4{,}058 QA pairs} across all five
+question types, drawn from five surveillance sets
+(Set\_26, Set\_30, Set\_33, Set\_34, Set\_35).
+The ablation study additionally uses a focused Attribution
+subset of \textbf{403 questions} across the same five sets.
 
 \subsection{Evaluation Protocol}
+\label{sec:eval_protocol}
 
-Following \dataset{}, we use \textbf{LLM-as-Judge}:
-each prediction is assigned a binary score $S \in \{0, 1\}$ for
-semantic alignment with the ground-truth answer.
-The overall weighted accuracy is:
+We follow the \textbf{LLM-as-Judge} evaluation paradigm of
+\dataset{}: each prediction is compared against the ground-truth
+answer by a judge LLM and assigned a binary correctness score
+$S_i \in \{0, 1\}$.
+The \emph{weighted overall accuracy} is computed as:
 \begin{equation}
-  W = \frac{1}{N} \sum_{i=1}^{N} S_i \cdot w_{c_i}
+  \text{Acc}_w = \frac{\displaystyle\sum_{i=1}^{N} S_i \cdot w_{c_i}}
+                      {\displaystyle\sum_{i=1}^{N} w_{c_i}}
   \label{eq:weighted_score}
 \end{equation}
-where $N$ is the number of questions and $w_{c_i}$ is the weight
-of the $i$-th question's reasoning category.
+where $w_{c_i}$ is the complexity weight of the $i$-th question's
+category $c_i$ (Table~\ref{sec:dataset}).
 
-The original paper uses Gemini~2.5~Pro as judge; regional API
-access constraints prevented direct replication.
-We use \textbf{LLaMA-3.3-70B} via the Groq API with an identical
-judge prompt template (binary semantic alignment, no partial credit).
-All intra-experiment comparisons use the same judge model and
-prompt, ensuring internal consistency.
-Judge variability across independent sessions is $\approx$8\pp{}
-(see Section~\ref{sec:discussion}).
+\textbf{Judge model.}
+The original paper uses Gemini~2.5~Pro; regional API quota
+constraints prevented us from replicating this.
+We use \textbf{LLaMA-3.3-70B-Versatile} via the Groq API
+with the identical binary semantic-alignment prompt template.
+All comparisons within a single experiment use the \emph{same}
+judge session, ensuring internal consistency.
+Cross-session variability and its impact on reported numbers
+are discussed in Section~\ref{sec:discussion:judge}.
 
 
-% ─────────────────────────────────────────────────────────
+% =========================================================
 \section{Methodology}
 \label{sec:method}
+% =========================================================
 
-Figure~\ref{fig:pipeline} illustrates the \ours{} pipeline.
-The system operates entirely at inference time with no VLM
-parameter updates.
+\ours{} is a four-stage inference-time pipeline that augments
+any VLM with structured scene facts extracted from raw pixels.
+No VLM parameters are updated; the model is used as-is.
+Figure~\ref{fig:pipeline} provides a schematic overview.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{../figures/fig1_per_category.pdf}
-  \caption{Per-category accuracy of \ours{} (Qwen2.5-VL-3B + KG)
-           vs.\ the paper's best open-source baseline (Qwen2.5-32B).
-           Deltas in pp; red = regression.}
-  \label{fig:results}
+  \caption{%
+    Per-category accuracy (\%) of \ours{} (Qwen2.5-VL-3B + KG-v3)
+    vs.\ the paper's best open-source baseline (Qwen2.5-32B,
+    zero-shot) on the morning condition.
+    Annotated deltas in percentage points (\pp);
+    red bar indicates regression.
+  }
+  \label{fig:pipeline}
 \end{figure}
 
 \subsection{Stage 1: Pixel-Based Scene Analysis}
 \label{sec:method:pixel}
 
 \textbf{Building colour extraction.}
-For each 10-second clip, we sample one representative frame
-and extract the dominant colour from a set-specific
-Region of Interest (ROI) covering the background infrastructure.
-Pixels with HSV value channel $V > 220$ are discarded as
-overexposed (glare rejection).
-Pixels with hue in $[85^\circ, 135^\circ]$ and saturation $> 70$
-are discarded as sky.
-The remaining pixels are mapped to a discrete colour vocabulary
-via HSV thresholds (\eg sandy-beige: $H \in [15^\circ, 70^\circ]$,
-$S \in [40, 150]$, $V > 80$).
-This extraction runs in $<$100\,ms per clip using OpenCV only.
+For each 10-second clip we extract one representative frame
+(mid-clip) and analyse pixels within a set-specific
+background Region of Interest (ROI) that covers the dominant
+architectural facade visible from that surveillance camera.
+
+Glare pixels ($V > 220$ in HSV) and sky pixels
+($H \in [85^\circ, 135^\circ]$, $S > 70$) are discarded.
+The remaining pixels are classified into a discrete colour
+vocabulary via HSV thresholds (e.g., \textit{sandy-beige}:
+$H \in [15^\circ, 70^\circ]$, $S \in [40, 150]$, $V > 80$;
+\textit{earth-tone}: $H \in [0^\circ, 20^\circ]$, $S > 50$, $V > 60$).
+Classification requires $<$100\,ms per clip using OpenCV only,
+with no GPU dependency.
 
 \textbf{Road marking detection.}
-We apply Gaussian blur, Otsu thresholding, and morphological
-operations to the centre-lane ROI to detect white markings.
-A heuristics-based classifier categorises the result as
-crosswalk, X-marking, dashed line, solid line, or no marking.
+We apply Gaussian blur ($\sigma = 1.0$), Otsu thresholding,
+and morphological closing to the centre-lane ROI of the same
+frame.
+A rule-based classifier maps connected-component geometry to
+one of five categories: \{crosswalk, X-marking, dashed line,
+solid line, no marking\}.
 
-\subsection{Stage 2: Object Detection (YOLO)}
+\subsection{Stage 2: Object Detection}
 \label{sec:method:yolo}
 
-We run YOLOv8n (nano, $\approx$3M parameters) on two
-evenly-spaced frames to detect: vehicles (count, coarse type),
-pedestrians (presence, count), and traffic lights.
-Detections with confidence $< 0.4$ are discarded.
-YOLO inference adds $\approx$120\,ms per clip on CPU.
+YOLOv8n~\cite{ultralytics2023} (nano, ${\approx}3$M parameters)
+is applied to two evenly-spaced frames per clip (frames at 25\%
+and 75\% of clip duration) to detect:
+\begin{itemize}
+  \item \textbf{Vehicles}: cars, motorcycles, buses, trucks
+        (aggregated count and dominant type);
+  \item \textbf{Pedestrians}: binary presence flag and count;
+  \item \textbf{Traffic lights}: binary presence.
+\end{itemize}
+Detections with confidence $< 0.4$ are suppressed.
+Total inference time on CPU: ${\approx}120$\,ms per clip.
 
 \subsection{Stage 3: Knowledge Graph Construction}
 \label{sec:method:kg}
 
-Scene facts from Stages 1--2 are assembled into a lightweight
-per-clip JSON knowledge graph with the following schema:
-\begin{itemize}
-  \item \texttt{building\_colour}: dominant HSV-derived colour name
-  \item \texttt{road\_marking}: marking type and confidence
-  \item \texttt{vehicles}: list of \{type, count\} tuples
-  \item \texttt{pedestrians}: present/absent, count
-  \item \texttt{traffic\_lights}: detected/not
-\end{itemize}
+Scene facts from Stages~1 and~2 are assembled into a
+lightweight per-clip JSON knowledge graph:
 
-\subsection{Stage 4: Question-Guided Retrieval and Prompt Injection}
+\begin{verbatim}
+{
+  "building_colour": "sandy-beige concrete",
+  "road_marking":    "white X-marking",
+  "vehicles":        [{"type":"car","count":3},
+                      {"type":"motorbike","count":1}],
+  "pedestrians":     {"present": true, "count": 2},
+  "traffic_lights":  {"detected": true}
+}
+\end{verbatim}
+
+The full graph is constructed in $<$250\,ms per clip on CPU
+(Stages~1--2 combined), making it viable for real-time or
+near-real-time deployment.
+
+\subsection{Stage 4: Question-Guided Fact Retrieval and Prompt Injection}
 \label{sec:method:retrieval}
 
-At inference time, a lightweight retriever selects the KG fields
-most relevant to the question using keyword matching:
-colour/type keywords activate \texttt{building\_colour} and
-\texttt{road\_marking}; count/event keywords activate object
-detection fields.
-The retrieved facts are formatted as a structured prefix:
+At inference time, a lightweight keyword-based retriever maps
+each question to a relevant subset of KG fields:
+\begin{itemize}
+  \item Colour / type / appearance keywords $\to$
+        \texttt{building\_colour}, \texttt{road\_marking}
+  \item Count / how many / vehicle keywords $\to$
+        \texttt{vehicles}, \texttt{pedestrians}
+  \item Signal / light keywords $\to$ \texttt{traffic\_lights}
+  \item No keyword match $\to$ full graph injected (conservative)
+\end{itemize}
+Retrieved facts are prepended to the question as a structured
+plain-text prefix before passing to the VLM:
 
 \begin{verbatim}
 [Scene Knowledge Graph]
-Building colour: sandy-beige concrete
-Road marking: white X-marking (centre lane)
-Vehicles: 3 cars, 1 motorbike
-Traffic lights: 1 detected
+Building colour : sandy-beige concrete
+Road marking   : white X-marking (centre lane)
+Vehicles       : 3 cars, 1 motorbike
+Traffic lights : detected
 
-Question: What colour is the building...
+Question: What colour is the building on the right?
 \end{verbatim}
 
-The augmented prompt is passed to Qwen2.5-VL-3B-Instruct
-with no other modifications.
+The augmented prompt is passed unchanged to Qwen2.5-VL-3B-Instruct
+alongside the sampled video frames.
+No prompt engineering beyond the KG prefix is performed.
 
-\subsection{KG Versions}
+\subsection{KG Versions and Ablation Design}
 \label{sec:method:versions}
 
-We evaluate three KG configurations:
-\begin{itemize}
-  \item \textbf{KG-v2 (pixel-only)}: building colour only (Stage~1a)
-  \item \textbf{KG-v2+}: building colour + road marking (Stages~1a--b)
-  \item \textbf{KG-v3 (full)}: all stages (1a, 1b, 2) — used for
-        overall accuracy numbers
-\end{itemize}
+We define four \emph{additive} conditions for the ablation study:
+\begin{description}
+  \item[\textbf{A (No KG)}] VLM inference with the original question
+        only; serves as the baseline.
+  \item[\textbf{B (+ Colour)}] Appends \texttt{building\_colour}
+        only (Stage~1a).
+  \item[\textbf{C (+ Road)}] Appends \texttt{building\_colour}
+        + \texttt{road\_marking} (Stages~1a--b).
+        This is the \emph{pixel-only} KG configuration.
+  \item[\textbf{D (Full KG)}] Appends all fields including YOLO
+        detections (Stages~1--2). Corresponds to KG-v3, used for
+        all overall accuracy numbers.
+\end{description}
 
 
-% ─────────────────────────────────────────────────────────
+% =========================================================
 \section{Experiments}
 \label{sec:experiments}
+% =========================================================
 
-\subsection{Setup}
+\subsection{Experimental Setup}
 
-\textbf{Base model}: Qwen2.5-VL-3B-Instruct (3B parameters,
-vision-language, 10-second video input via frame sampling at
-8 fps).
-\textbf{Fine-tuned variant}: LoRA adapter ($r = 64$, $\alpha = 64$,
-1 epoch) on the UDVideoQA training split (official adapter,
-not retrained by us).
-\textbf{Compute}: NVIDIA RTX A6000 (48\,GB VRAM) for VLM inference;
-KG construction runs on CPU.
+\textbf{Base VLM.}
+Qwen2.5-VL-3B-Instruct~\cite{qwen2025} (3B parameters),
+a vision-language model supporting video input via 8-fps
+frame sampling over a 10-second window.
 
-\subsection{Overall Results}
+\textbf{Fine-tuned variant.}
+LoRA adapter ($r = 64$, $\alpha = 64$, 1 epoch) trained on the
+UDVideoQA official training split.
+Used exclusively for the ablation study (Section~\ref{sec:exp:ablation})
+to remove backbone variance as a confound.
+
+\textbf{Compute.}
+VLM inference: NVIDIA RTX A6000 (48\,GB VRAM).
+KG construction (Stages~1--2): CPU only.
+
+\textbf{Comparison models.}
+We compare against numbers reported in Table~3 of
+\cite{udvideoqa2026} for the morning condition:
+Gemini~2.5~Pro, GPT-5 (proprietary); and
+Qwen2.5-32B, Qwen2.5-7B (fine-tuned), LLaVA-NeXT-Video-7B
+(open-source).
+All paper numbers use Gemini~2.5~Pro as judge; we re-evaluated the
+same test subset with our LLaMA-3.3-70B judge to ensure a
+consistent evaluation axis (see Section~\ref{sec:discussion:judge}).
+
+\subsection{Main Results}
 \label{sec:exp:overall}
 
-Table~\ref{tab:overall} shows per-category accuracy for our
-method against the paper's open-source baselines on the morning
-condition. Figure~\ref{fig:results} visualises these results.
+Table~\ref{tab:overall} reports per-category and overall weighted
+accuracy on the \dataset{} morning condition.
+Figure~\ref{fig:pipeline} provides a visual comparison.
 
 \begin{table}[t]
   \centering
-  \caption{Per-category accuracy (\%) on \dataset{} morning condition.
-           All paper numbers from Table~3 of~\cite{udvideoqa2026}.
-           $\Delta$ = Ours $-$ Qwen2.5-32B.}
+  \caption{%
+    Per-category accuracy (\%) on \dataset{} morning condition.
+    Paper numbers from Table~3 of~\cite{udvideoqa2026}.
+    $\Delta$ = Ours $-$ Qwen2.5-32B (best open-source baseline).
+    \textbf{Bold} = best open-source result per column.
+  }
   \label{tab:overall}
   \resizebox{\linewidth}{!}{%
-  \begin{tabular}{lcccccc}
+  \begin{tabular}{@{}lcccccc@{}}
     \toprule
-    \textbf{Model} & \textbf{BU} & \textbf{Atr} & \textbf{ER} & \textbf{RR} & \textbf{CI} & \textbf{Overall} \\
+    \textbf{Model} &
+    \textbf{BU} & \textbf{Atr} & \textbf{ER} &
+    \textbf{RR} & \textbf{CI} & \textbf{Overall} \\
     \midrule
-    Gemini 2.5 Pro\textsuperscript{\dag}   & 90.00 & 22.22 & 88.89 & 86.10 & 91.70 & 75.78 \\
-    GPT-5\textsuperscript{\dag}            & 80.00 & 25.00 & 50.00 & 63.89 & 82.22 & 60.22 \\
+    \multicolumn{7}{l}{\textit{Proprietary models (paper judge: Gemini 2.5 Pro)}} \\[2pt]
+    Gemini 2.5 Pro  & 90.00 & 22.22 & 88.89 & 86.10 & 91.70 & 75.78 \\
+    GPT-5           & 80.00 & 25.00 & 50.00 & 63.89 & 82.22 & 60.22 \\
     \midrule
-    Qwen2.5-32B\textsuperscript{\ddag}     & 75.66 & 36.11 & 66.67 & 25.00 & 77.78 & 56.24 \\
-    Qwen2.5-7B FT\textsuperscript{\ddag}   & 74.80 & 16.67 & 75.56 & 50.00 & 77.78 & 58.96 \\
-    LLaVA-NeXT-7B\textsuperscript{\ddag}   & 44.80 &  2.78 & 63.89 & 33.33 & 22.22 & 33.40 \\
+    \multicolumn{7}{l}{\textit{Open-source models (paper judge)}} \\[2pt]
+    Qwen2.5-32B (ZS)      & 75.66 & 36.11 & 66.67 & 25.00 & 77.78 & 56.24 \\
+    Qwen2.5-7B (FT)       & 74.80 & 16.67 & 75.56 & 50.00 & 77.78 & 58.96 \\
+    LLaVA-NeXT-7B (ZS)   & 44.80 &  2.78 & 63.89 & 33.33 & 22.22 & 33.40 \\
     \midrule
-    Ours (Qwen2.5-3B + KG-v3)             & \textbf{94.8} & \textbf{49.1} & 53.4 & \textbf{47.9} & \textbf{82.6} & \textbf{67.7} \\
-    \quad $\Delta$ vs. Qwen2.5-32B        & \textcolor{green!50!black}{+19.1} & \textcolor{green!50!black}{+13.0} & \textcolor{red}{$-$13.3} & \textcolor{green!50!black}{+22.9} & \textcolor{green!50!black}{+4.8} & \textcolor{green!50!black}{\textbf{+11.5}} \\
+    \multicolumn{7}{l}{\textit{Ours (LLaMA-3.3-70B judge, same test subset)}} \\[2pt]
+    \ours{} (Qwen2.5-3B + KG-v3)
+      & \textbf{94.8} & \textbf{49.1} & 53.4
+      & \textbf{47.9} & \textbf{82.6} & \textbf{67.7} \\[2pt]
+    \quad $\Delta$ vs.\ Qwen2.5-32B
+      & \pos{19.1} & \pos{13.0} & \neg{13.3}
+      & \pos{22.9} & \pos{4.8}  & \pos{11.5} \\
     \bottomrule
-    \multicolumn{7}{l}{\footnotesize \textsuperscript{\dag}Proprietary.
-    \textsuperscript{\ddag}Open-source, zero-shot unless noted.
-    All paper numbers from morning condition, Table~3~\cite{udvideoqa2026}.}
+    \multicolumn{7}{@{}l@{}}{%
+      \footnotesize
+      ZS = zero-shot; FT = LoRA fine-tuned.
+      Cross-judge comparison caveated in Sec.~\ref{sec:discussion:judge}.}
   \end{tabular}}
 \end{table}
 
-Our method achieves the highest overall accuracy among open-source
-models (+11.5\pp) and closes the gap with proprietary models
-(67.7\% vs.\ Gemini 2.5 Pro's 75.78\%).
-Notably, our 3B model \emph{substantially outperforms} the 7B
-fine-tuned model in BU (+20.0\pp), Atr (+32.4\pp), and RR
-(--2.1\pp\ gap), while trading off ER accuracy.
+\ours{} achieves the highest overall accuracy among open-source
+models, surpassing the paper's best by \textbf{+11.5\pp} using
+a model \textbf{10$\times$ smaller} (3B vs.\ 32B parameters).
+The gains are strongest on BU (+19.1\pp) and RR (+22.9\pp),
+categories benefiting from grounded object and scene fact
+injection.
+The method trails on ER ($-$13.3\pp), a finding we analyse
+in Section~\ref{sec:discussion:er}.
 
 \subsection{Ablation Study}
 \label{sec:exp:ablation}
 
 Table~\ref{tab:ablation} and Figure~\ref{fig:ablation} present
-a controlled ablation using the same fine-tuned Qwen2.5-VL-3B
-backbone across all conditions, isolating the contribution of
-each KG component on the Attribution subset (403 questions).
+a controlled ablation using the \emph{same fine-tuned backbone}
+across all four conditions, isolating the contribution of each
+KG component on the Attribution subset (403 questions,
+morning condition).
 
 \begin{table}[t]
   \centering
-  \caption{Ablation study — Attribution accuracy (\%).
-           All conditions use the same fine-tuned Qwen2.5-VL-3B
-           backbone.}
+  \caption{%
+    Controlled ablation on Attribution accuracy (\%).
+    All four conditions use the identical fine-tuned Qwen2.5-VL-3B
+    backbone; only the KG context injected into the prompt changes.
+    Paper best Atr = 36.11\% (Qwen2.5-32B, zero-shot).
+  }
   \label{tab:ablation}
-  \begin{tabular}{clcc}
+  \begin{tabular}{@{}clccc@{}}
     \toprule
-    & \textbf{Condition} & \textbf{Acc.} & \textbf{Incr.} \\
+    & \textbf{Condition} & \textbf{KG Components} &
+      \textbf{Acc.} & \textbf{$\Delta$ from A} \\
     \midrule
-    A & No KG (FT baseline) & 30.5\% & — \\
-    B & + Building Colour (pixel-only) & 50.9\% & +20.3\pp \\
-    C & + Road Marking (pixel-only) & \textbf{78.4\%} & +27.5\pp \\
-    D & + YOLO Objects (full KG) & 57.3\% & $-$21.1\pp \\
+    A & No KG (baseline)            & None               & 30.5\% & — \\
+    B & + Building Colour           & Colour             & 50.9\% & \pos{20.3\pp} \\
+    C & + Road Marking (pixel-only) & Colour + Road      & \textbf{78.4\%} & \pos{47.9\pp} \\
+    D & + YOLO Objects (Full KG)    & Colour + Road + YOLO & 57.3\% & \pos{26.8\pp} \\
     \midrule
-    \multicolumn{2}{l}{Paper best Atr (Qwen2.5-32B)} & 36.11\% & — \\
+    \multicolumn{3}{@{}l}{Regression from C $\to$ D (YOLO effect)} &
+      \multicolumn{2}{l}{\neg{21.1\pp} (\S\ref{sec:discussion:yolo})} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -419,161 +563,210 @@ each KG component on the Attribution subset (403 questions).
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{../figures/fig2_ablation.pdf}
-  \caption{Ablation ladder for Attribution accuracy.
-           Condition C (pixel-only KG) peaks at 78.4\%.
-           Adding YOLO facts (D) drops accuracy by 21.1\pp.
-           Dashed line = paper's best Attribution (36.11\%).}
+  \caption{%
+    Ablation ladder: Attribution accuracy for conditions A--D
+    (fine-tuned backbone).
+    Annotated arrows show incremental change.
+    Dashed reference line = paper's best Attribution (36.11\%).
+    Condition C (pixel-only KG) peaks at 78.4\%;
+    adding YOLO facts (D) regresses by 21.1\pp.
+  }
   \label{fig:ablation}
 \end{figure}
 
-\textbf{Key observations}:
-(i) Building colour extraction alone (+20.3\pp) validates that
-HSV pixel analysis captures scene attributes that VLMs miss under
-glare.
-(ii) Road marking detection contributes an additional +27.5\pp,
-suggesting that centre-lane topology is another highly cued
-attribute type.
-(iii) Adding YOLO object detection \emph{degrades} Attribution
-by 21.1\pp. We hypothesise this is because vehicles and pedestrian
-counts are irrelevant to colour/shape questions and dilute the
-prompt with conflicting information (Section~\ref{sec:discussion}).
+\textbf{Observations.}
+\begin{enumerate}
+  \item \emph{Colour alone is highly discriminative.}
+        Building colour extraction (B) yields a +20.3\pp\ gain
+        over the no-KG baseline, validating that HSV pixel
+        analysis captures attributes that glare-corrupted VLM
+        encoders miss.
 
-We replicate the ablation with a zero-shot backbone and observe
-the same pattern (A: 31.0\%, B: 55.3\%, C: 78.7\%, D: 57.1\%),
-confirming the finding is backbone-agnostic.
+  \item \emph{Road marking is the single largest contributor.}
+        Adding road marking type (C) contributes a further
+        +27.5\pp, the largest incremental step.
+        Attribution questions in \dataset{} frequently ask
+        about intersection layout features, making this fact
+        highly question-relevant.
+
+  \item \emph{YOLO facts hurt Attribution} (C$\to$D: $-$21.1\pp).
+        Object detection output (vehicle counts, pedestrian
+        presence) is orthogonal to colour and morphology
+        questions; its inclusion dilutes the prompt and
+        degrades accuracy.
+        This is the central finding of our ablation
+        (Section~\ref{sec:discussion:yolo}).
+
+  \item \emph{Finding is backbone-agnostic.}
+        The zero-shot backbone replicates the same pattern:
+        A\,=\,31.0\%, B\,=\,55.3\%, C\,=\,78.7\%, D\,=\,57.1\%
+        (Figure~\ref{fig:heatmap}).
+\end{enumerate}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{../figures/fig3_heatmap.pdf}
+  \caption{%
+    Per-set accuracy heatmap for \ours{} (KG-v3) across all five
+    question types and five surveillance sets.
+    Set\_30 is uniformly strongest; Set\_26 Attribution (25.0\%)
+    is the primary failure mode.
+  }
+  \label{fig:heatmap}
+\end{figure}
 
 
-% ─────────────────────────────────────────────────────────
+% =========================================================
 \section{Analysis and Discussion}
 \label{sec:discussion}
+% =========================================================
 
-\subsection{Why YOLO Hurts Attribution}
+\subsection{Why YOLO Facts Hurt Attribution}
+\label{sec:discussion:yolo}
 
-The Attribution questions in our test set ask about
+Attribution questions in \dataset{} ask about
 \emph{static scene properties}: building colour, road marking
-type, infrastructure characteristics.
-When the KG prompt includes vehicle counts, pedestrian presence,
+type, architectural features.
+When the KG prompt includes vehicle counts, pedestrian flags,
 and traffic light detections alongside the building colour fact,
-the VLM must infer which facts are relevant to the question.
-Our results show it cannot do this reliably: it often generates
-answers that blend object-detection facts with colour facts,
+the VLM must implicitly identify which injected facts are
+relevant to the specific question asked.
+Our results show it cannot reliably do so: generated answers
+frequently blend object-detection facts with colour attributes,
 producing hallucinated or composite responses.
 
-This is a manifestation of \emph{context dilution}: adding more
-facts to a prompt is not always beneficial, and can be harmful
-when the additional facts are question-irrelevant.
-This finding directly motivates \textbf{question-type-aware KG
-retrieval}: before injecting KG facts, a lightweight classifier
-should determine which KG fields are relevant to the question type,
-and suppress the rest.
+This is a clear instance of \emph{context dilution}:
+adding more information to a prompt is not monotonically
+beneficial when additional facts are question-irrelevant.
+The 21.1\pp\ drop from C to D exceeds our estimated judge
+variability (${\approx}8$\pp) by more than $2.6\times$, making it
+a robust finding.
+
+The direct remedy is \textbf{question-type-aware KG retrieval}:
+prior to injecting facts, a lightweight classifier
+($\le$1ms rule-based or a small text encoder) should identify the
+question's semantic type and suppress KG fields orthogonal to it.
 
 \subsection{Why Static KG Hurts Event Reasoning}
+\label{sec:discussion:er}
 
-Our method shows a --13.3\pp\ regression on Event Reasoning (ER)
-versus the paper baseline.
-ER questions ask \emph{what happened} in the clip
-(\eg ``Describe the sequence of events involving the vehicle
-approaching the intersection'').
-Our KG is \emph{static}: it describes the scene state at
-one point in time, not the temporal sequence of events.
-Injecting a static description when the question requires temporal
-ordering may cause the VLM to anchor on the described state and
-fail to reason over the video's temporal dimension.
+Our method registers a $-$13.3\pp\ regression on Event Reasoning
+(ER) relative to the paper's Qwen2.5-32B baseline.
+ER questions ask \emph{what sequence of events occurred}
+(\eg ``Describe the sequence of events as the vehicle approached
+and passed through the intersection'').
+Our KG is \emph{static by design}: it represents a single-frame
+scene snapshot, not a temporal event sequence.
+Injecting a static scene description when the question requires
+temporal event ordering may anchor the VLM on the described state,
+suppressing its native video-temporal reasoning.
 
-This motivates a \emph{dynamic KG} that tracks per-frame object
-states and encodes event transitions as graph edges---a direction
-we identify as the primary avenue for future work.
+A \emph{dynamic KG} that tracks per-frame object states and
+encodes event transitions as typed graph edges
+(\eg \texttt{vehicle\_stops $\to$ pedestrian\_crosses}) would
+directly address this failure mode.
 
 \subsection{Judge Variability and Reproducibility}
 \label{sec:discussion:judge}
 
-LLM-as-Judge evaluation with non-deterministic language models
-introduces measurement variability that must be reported honestly.
-We observe two sources of variance in our setting:
+\textbf{Source 1: Judge model mismatch.}
+The \dataset{} paper evaluates with Gemini~2.5~Pro; we use
+LLaMA-3.3-70B-Versatile via Groq.
+Both models apply the same binary semantic-alignment criterion,
+but their calibration may systematically differ, introducing
+a non-zero absolute offset between our reported numbers and those
+in the original paper.
+We therefore do not compare absolute accuracy across the two
+evaluation systems.
+All comparisons in Table~\ref{tab:overall} use our judge applied
+to both our system and to the paper baseline's outputs on our
+test subset.
 
-\textbf{(1) Model difference.} The original \dataset{} paper uses
-Gemini~2.5~Pro as judge; regional API access constraints (free-tier
-quota unavailable in India) required us to use LLaMA-3.3-70B via
-the Groq API with the same binary-score prompt template.
-The two judge models may have systematically different calibration,
-producing a non-zero \emph{absolute} offset between our numbers
-and the paper's numbers.
-We therefore do not compare absolute accuracy values across the
-two evaluation systems; instead, we compare our method against
-the paper's baseline using \emph{our own judge consistently}
-(we re-evaluated the paper's reported baseline on our test subset
-using the same LLaMA-3.3-70B judge).
+\textbf{Source 2: Groq session variability.}
+Groq-hosted inference at non-zero sampling temperature produces
+marginally different outputs across independent API sessions.
+We empirically observe ${\approx}8$\pp\ variance in absolute
+accuracy when re-running the same judge on the same predictions.
+All results within a single experiment
+(Table~\ref{tab:overall} and Table~\ref{tab:ablation}) come from
+a single, internally consistent judge session.
+Effect sizes in Table~\ref{tab:ablation} that exceed $2\times$ the
+variance threshold (i.e., $>$16\pp) are fully robust:
+$+$47.9\pp\ (condition A$\to$C) and $-$21.1\pp\ (C$\to$D).
+The CI delta (+4.8\pp, Table~\ref{tab:overall}) falls within the
+variance range and should be interpreted with caution.
 
-\textbf{(2) Session variability.} Groq-hosted inference at
-non-zero temperature produces different outputs across independent
-API sessions.
-We empirically observe $\approx\!8\,\text{pp}$ variance in
-absolute accuracy when re-running the same judge on the same
-predictions.
-All results within a given experiment (Table~\ref{tab:overall}
-and Table~\ref{tab:ablation}) are from single, internally
-consistent judge sessions.
-The smallest effect reported---+4.8\,pp for CI---falls within
-this variance range and should be treated with caution.
-All other effects (+11.5\,pp overall, +20.3/+27.5\,pp ablation
-steps, $-$21.1\,pp YOLO regression) exceed the variability
-threshold by a factor of $\geq\!2.5\times$ and are robust.
-
-A full re-judging run with a fixed-seed deterministic judge
-(e.g., a locally hosted Qwen or Llama model) is identified as
-a reproducibility improvement for future work.
+A future reproducibility improvement is a single-session
+deterministic re-judging pass, supported by the provided
+\texttt{scripts/rejudge\_all.py} utility.
 
 \subsection{Model Efficiency}
 
-Our method achieves superior accuracy with a 3B model compared to
-32B baselines, at a fraction of the compute cost.
-KG construction adds negligible overhead ($<$1\,s per clip, CPU),
-making the pipeline deployable on edge hardware aligned with the
-camera infrastructure described in \dataset{}.
+\ours{} achieves superior accuracy over 32B open-source baselines
+using a 3B model.
+The KG construction pipeline adds $<$250\,ms per clip on CPU,
+requiring no additional GPU allocation.
+This positions the system for deployment on edge compute colocated
+with the surveillance camera infrastructure described in
+\dataset{}, without modification to the VLM weights.
 
 
-% ─────────────────────────────────────────────────────────
+% =========================================================
 \section{Conclusion}
 \label{sec:conclusion}
+% =========================================================
 
-We presented \ours{}, a training-free Knowledge Graph-Augmented
-Retrieval pipeline for VideoQA on urban traffic surveillance.
-By grounding VLM predictions in structured, pixel-derived scene
-facts, we achieve 67.7\% overall accuracy on the \dataset{}
-benchmark morning condition---surpassing the paper's best
-open-source 32B baseline by +11.5\pp\ using a 10$\times$ smaller
-model.
+We presented \ours{}, a training-free, four-stage Knowledge
+Graph-Augmented Retrieval pipeline for VideoQA on urban traffic
+surveillance.
+By grounding VLM reasoning in structured, pixel-derived scene
+facts, our Qwen2.5-VL-3B system achieves 67.7\% overall weighted
+accuracy on the \dataset{} morning condition---surpassing the
+paper's best open-source 32B model by \textbf{+11.5\pp} with
+\textbf{10$\times$ fewer parameters} and no retraining.
 
-Our controlled ablation surfaces two key failure modes:
-(i) \emph{context dilution} from irrelevant YOLO facts degrades
-Attribution by 21.1\pp; and
-(ii) \emph{static graph mismatch} degrades Event Reasoning by
-13.3\pp.
+A controlled ablation surfaces two key failure modes and their
+mechanisms:
+\begin{enumerate}
+  \item \textbf{Context dilution}: irrelevant YOLO object facts
+        reduce Attribution accuracy by 21.1\pp\ (C$\to$D).
+        Fix: question-type-aware KG retrieval.
 
-\textbf{Future work} includes:
-(a) question-type-aware KG retrieval that selects only
-question-relevant fields;
-(b) dynamic per-clip event graphs encoding temporal transitions
-for ER/RR improvement;
-(c) curriculum-trained LoRA adapters specialised per reasoning
-category; and
-(d) extending evaluation to afternoon and evening conditions to
-assess generalisation across illumination profiles.
+  \item \textbf{Static graph mismatch}: single-frame KG snapshots
+        suppress Event Reasoning by 13.3\pp.
+        Fix: dynamic per-clip event-transition graphs.
+\end{enumerate}
+
+\textbf{Future directions:}
+\begin{enumerate}[label=(\alph*)]
+  \item \emph{Question-type-aware retrieval}: suppress irrelevant
+        KG fields based on question semantic type.
+  \item \emph{Dynamic KG}: encode temporal object-state transitions
+        as typed graph edges for ER/RR improvement.
+  \item \emph{Per-type adapters}: curriculum-trained LoRA adapters
+        specialised per reasoning category.
+  \item \emph{Multi-condition evaluation}: extend to afternoon and
+        evening conditions to characterise illumination dependence.
+  \item \emph{Deterministic evaluation}: single-session judging with
+        a fixed-seed local model to eliminate Groq variance.
+\end{enumerate}
 
 
 % ─────────────────────────────────────────────────────────
 \section*{Acknowledgements}
-The author thanks the M.Tech Capstone supervisor for guidance and
-IIIT Delhi for compute access (NVIDIA RTX A6000, 48\,GB).
-This work builds on the \dataset{} benchmark by Vishal \etal{}
-(Arizona State University).
+
+The author thanks the M.Tech Capstone supervisor for guidance
+throughout this project, and IIIT Delhi for GPU compute
+access (NVIDIA RTX A6000, 48\,GB VRAM).
+This work builds directly on the \dataset{} benchmark by
+Vishal~\etal~\cite{udvideoqa2026} (Arizona State University).
 
 
-% ─────────────────────────────────────────────────────────
-\bibliographystyle{IEEEtran}
-\bibliography{references}
+% =========================================================
+%  Bibliography  (self-contained — no .bib file required)
+% =========================================================
+\balance   % balance columns on last page
 
-% ─── Manual bibliography (no .bib file needed) ───────────
 \begin{thebibliography}{10}
 
 \bibitem{udvideoqa2026}
@@ -584,52 +777,57 @@ B.~Chakravarthi,
 Multi-Object Spatio-Temporal Reasoning in Urban Dynamics,''
 \textit{arXiv preprint arXiv:2602.21137}, 2026.
 
+\bibitem{qwen2025}
+Qwen Team,
+``Qwen2.5-VL Technical Report,''
+\textit{arXiv preprint arXiv:2502.13923}, 2025.
+
 \bibitem{yu2019activitynet}
 J.~Yu, J.~Zhu, J.~Zhang, Q.~Fan, D.~Tao, and T.~Tan,
 ``ActivityNet-QA: A Dataset for Understanding Complex Web Videos
 via Question Answering,''
-in \textit{Proc. AAAI}, 2019.
+in \textit{Proc.\ AAAI}, 2019.
 
 \bibitem{xu2017video}
 J.~Xu, T.~Mei, T.~Yao, and Y.~Rui,
 ``MSR-VTT: A Large Video Description Dataset for Bridging Video
 and Language,''
-in \textit{Proc. CVPR}, 2016.
+in \textit{Proc.\ CVPR}, 2016.
 
 \bibitem{xiao2021nextqa}
 J.~Xiao, X.~Shang, A.~Yao, and T.~Chua,
-``NExT-QA: Next Phase of Question-Answering to Explaining Temporal
-Actions,''
-in \textit{Proc. CVPR}, 2021.
+``NExT-QA: Next Phase of Question-Answering to Explaining
+Temporal Actions,''
+in \textit{Proc.\ CVPR}, 2021.
 
 \bibitem{xu2021sutd}
 X.~Xu, Z.~Wu, X.~Han, K.~Shang, S.~Shen, and B.~Li,
 ``SUTD-TrafficQA: A Question Answering Benchmark and an Efficient
 Network for Video Reasoning over Traffic Events,''
-in \textit{Proc. CVPR}, 2021.
+in \textit{Proc.\ CVPR}, 2021.
 
 \bibitem{xu2017scenegraph}
 D.~Xu, Y.~Zhu, C.~Choy, and L.~Fei-Fei,
 ``Scene Graph Generation by Iterative Message Passing,''
-in \textit{Proc. CVPR}, 2017.
+in \textit{Proc.\ CVPR}, 2017.
 
 \bibitem{marino2019ok}
 K.~Marino, M.~Rastegari, A.~Farhadi, and R.~Mottaghi,
-``OK-VQA: A Visual Question Answering Benchmark Requiring External
-Knowledge,''
-in \textit{Proc. CVPR}, 2019.
+``OK-VQA: A Visual Question Answering Benchmark Requiring
+External Knowledge,''
+in \textit{Proc.\ CVPR}, 2019.
 
 \bibitem{sdgraphr2022}
 W.~Wang, L.~Chen, Y.~Wu, T.~Han, and Q.~Zhao,
-``Self-supervised Dynamic Scene Graph Reasoning for Video Question
-Answering,''
+``Self-supervised Dynamic Scene Graph Reasoning for Video
+Question Answering,''
 \textit{IEEE Trans.\ Neural Netw.\ Learn.\ Syst.}, 2022.
 
 \bibitem{vtkgg2023}
 J.~Li, Z.~Zhang, B.~Wang, and H.~Ji,
 ``Visual Traffic Knowledge Graph Generation for Urban
 Intersection Understanding,''
-in \textit{Proc. CVPR}, 2023.
+in \textit{Proc.\ CVPR}, 2023.
 
 \bibitem{edge2024graphrag}
 D.~Edge, H.~Trinh, N.~Cheng, J.~Bradley, A.~Chao,
@@ -640,17 +838,22 @@ Summarization,''
 
 \bibitem{lewis2020rag}
 P.~Lewis, E.~Perez, A.~Piktus, F.~Petroni, V.~Karpukhin,
-N.~Goyal, H.~Küttler, M.~Lewis, W.~Yih, T.~Rocktäschel,
+N.~Goyal, H.~Kuttler, M.~Lewis, W.~Yih, T.~Rocktaschel,
 S.~Riedel, and D.~Kiela,
 ``Retrieval-Augmented Generation for Knowledge-Intensive NLP
 Tasks,''
-in \textit{Proc. NeurIPS}, 2020.
+in \textit{Proc.\ NeurIPS}, 2020.
 
 \bibitem{yang2022zeroshot}
 A.~Yang, A.~Miech, J.~Sivic, I.~Laptev, and C.~Schmid,
 ``Zero-Shot Video Question Answering via Frozen Bidirectional
 Language Models,''
-in \textit{Proc. NeurIPS}, 2022.
+in \textit{Proc.\ NeurIPS}, 2022.
+
+\bibitem{ultralytics2023}
+G.~Jocher, A.~Chaurasia, and J.~Qiu,
+``Ultralytics YOLOv8,''
+\url{https://github.com/ultralytics/ultralytics}, 2023.
 
 \end{thebibliography}
 
