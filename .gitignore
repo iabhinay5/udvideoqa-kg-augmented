@@ -1,0 +1,90 @@
+# === PRIVATE / SENSITIVE — never commit ===
+AI_CONTEXT_LOG.md
+setup_server.sh
+docs/meeting_notes/
+docs/presentations/
+*.pptx
+
+# === Raw intermediate result files (use results/sync_for_report/ instead) ===
+all_models_comparison*.csv
+GraphRAG_*.csv
+KnowledgeGraph_*.json
+
+# === DATA (use DVC or HuggingFace for data versioning) ===
+data/raw/
+data/videos/
+*.mp4
+*.avi
+*.mov
+
+# === MODEL CHECKPOINTS (large, don't commit) ===
+results/checkpoints/
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+
+# === LOGS (generated, not source) ===
+results/logs/
+wandb/
+mlruns/
+*.log
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# === Jupyter ===
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# === Environment & Secrets ===
+.env
+*.env
+secrets.yaml
+api_keys.txt
+
+# === OS junk ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+
+# === HuggingFace cache ===
+.cache/
+
+# === Paper PDFs and extracted text (copyright — do not redistribute) ===
+papers/*.pdf
+papers/*_text.txt
+
+# === Generated LaTeX aux files ===
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.bbl
+report/*.blg
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+
+# === Intermediate result files (large raw CSV) ===
+results/sync_for_report/ablation_FT_all_answers.csv
+
+# NOTE: papers/, docs/, src/, configs/, scripts/, figures/, report/ ARE committed
+# NOTE: results/sync_for_report/*_judged.csv ARE committed (ground truth for reproducibility)
+# NOTE: results/logs/ and results/checkpoints/ are NOT committed (use DVC)
