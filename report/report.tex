@@ -45,6 +45,9 @@
 \usepackage{enumitem}  % enumerate[label=...] support
 \usepackage{bm}        % \bm bold math
 
+% Figure search path: works locally (report/ subdir) AND on Overleaf (flat)
+\graphicspath{{../figures/}{figures/}{./}}
+
 % ─────────────────────────────────────────────────────────
 %  Macros
 % ─────────────────────────────────────────────────────────
@@ -55,9 +58,9 @@
 \newcommand{\ie}{\textit{i.e.,}~}
 \newcommand{\etal}{\textit{et~al.}}
 
-% Green / red delta colours
+% Green / red delta colours (note: \neg is a LaTeX built-in; use \redd)
 \newcommand{\pos}[1]{\textcolor{ForestGreen}{\textbf{+#1}}}
-\newcommand{\neg}[1]{\textcolor{red}{$-$#1}}
+\newcommand{\redd}[1]{\textcolor{red}{$-$#1}}
 
 % ─────────────────────────────────────────────────────────
 %  Title & author
@@ -76,6 +79,8 @@
 
 % =========================================================
 \begin{document}
+\sloppy                        % relax line-breaking strictness
+\setlength{\emergencystretch}{3em}  % allow extra stretch before overfull
 \maketitle
 
 % ─────────────────────────────────────────────────────────
@@ -377,12 +382,12 @@ lightweight per-clip JSON knowledge graph:
 
 \begin{verbatim}
 {
-  "building_colour": "sandy-beige concrete",
-  "road_marking":    "white X-marking",
-  "vehicles":        [{"type":"car","count":3},
-                      {"type":"motorbike","count":1}],
-  "pedestrians":     {"present": true, "count": 2},
-  "traffic_lights":  {"detected": true}
+ "building_colour": "sandy-beige concrete",
+ "road_marking"   : "white X-marking",
+ "vehicles"       : [{"type":"car","count":3},
+                     {"type":"moto","count":1}],
+ "pedestrians"    : {"present":true,"count":2},
+ "traffic_lights" : {"detected":true}
 }
 \end{verbatim}
 
@@ -408,12 +413,12 @@ plain-text prefix before passing to the VLM:
 
 \begin{verbatim}
 [Scene Knowledge Graph]
-Building colour : sandy-beige concrete
-Road marking   : white X-marking (centre lane)
-Vehicles       : 3 cars, 1 motorbike
-Traffic lights : detected
+Building colour: sandy-beige concrete
+Road marking  : white X-marking
+Vehicles      : 3 cars, 1 motorbike
+Traffic lights: detected
 
-Question: What colour is the building on the right?
+Q: What colour is the building on the right?
 \end{verbatim}
 
 The augmented prompt is passed unchanged to Qwen2.5-VL-3B-Instruct
@@ -507,7 +512,7 @@ Figure~\ref{fig:pipeline} provides a visual comparison.
       & \textbf{94.8} & \textbf{49.1} & 53.4
       & \textbf{47.9} & \textbf{82.6} & \textbf{67.7} \\[2pt]
     \quad $\Delta$ vs.\ Qwen2.5-32B
-      & \pos{19.1} & \pos{13.0} & \neg{13.3}
+      & \pos{19.1} & \pos{13.0} & \redd{13.3}
       & \pos{22.9} & \pos{4.8}  & \pos{11.5} \\
     \bottomrule
     \multicolumn{7}{@{}l@{}}{%
@@ -554,8 +559,8 @@ morning condition).
     C & + Road Marking (pixel-only) & Colour + Road      & \textbf{78.4\%} & \pos{47.9\pp} \\
     D & + YOLO Objects (Full KG)    & Colour + Road + YOLO & 57.3\% & \pos{26.8\pp} \\
     \midrule
-    \multicolumn{3}{@{}l}{Regression from C $\to$ D (YOLO effect)} &
-      \multicolumn{2}{l}{\neg{21.1\pp} (\S\ref{sec:discussion:yolo})} \\
+    \multicolumn{3}{@{}l}{Regression C$\to$D (YOLO noise)} &
+      \multicolumn{2}{l}{\redd{21.1\pp} (\S\ref{sec:discussion:yolo})} \\
     \bottomrule
   \end{tabular}
 \end{table}
